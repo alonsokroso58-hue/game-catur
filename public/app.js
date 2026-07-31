@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io('https://game-catur-production.up.railway.app');
 let board = null;
 let game = new Chess();
 let playerColor = 'w';
