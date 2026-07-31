@@ -5,7 +5,6 @@ const { Server } = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 
-// 1. TAMBAHKAN CORS DI SINI
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -57,8 +56,8 @@ io.on('connection', (socket) => {
   });
 });
 
-// 2. GUNAKAN process.env.PORT
+// Binding ke process.env.PORT dan 0.0.0.0 wajib untuk Railway
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server berjalan di port ${PORT}`);
 });
