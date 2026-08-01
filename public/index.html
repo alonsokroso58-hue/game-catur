@@ -28,7 +28,8 @@
       <div class="main-layout">
         <div class="board-section">
           <div class="timer-bar">Lawan: <span id="opponentTimer">05:00</span></div>
-          <div id="board" style="width: 400px"></div>
+          <!-- Atribut style="width: 400px" sudah dihapus agar responsif di HP -->
+          <div id="board"></div>
           <div class="timer-bar">Kamu: <span id="playerTimer">05:00</span></div>
         </div>
 
@@ -45,10 +46,10 @@
   <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
   
-  <!-- Socket.io via CDN (Menggantikan /socket.io/socket.io.js) -->
+  <!-- Socket.io via CDN -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   
-  <!-- File Logika Utama (Harus paling bawah) -->
+  <!-- File Logika Utama -->
   <script src="app.js"></script>
 </body>
 </html>
