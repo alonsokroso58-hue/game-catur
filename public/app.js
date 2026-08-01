@@ -17,6 +17,12 @@ const statusEl = document.getElementById('status');
 const roomDisplay = document.getElementById('roomDisplay');
 const moveLog = document.getElementById('moveLog');
 
+// Element Chat & Emoji
+const chatLog = document.getElementById('chatLog');
+const chatInput = document.getElementById('chatInput');
+const sendChatBtn = document.getElementById('sendChatBtn');
+const emojiBtns = document.querySelectorAll('.emoji-btn');
+
 joinBtn.addEventListener('click', () => {
   const room = roomInput.value.trim().toUpperCase();
   if (room) {
@@ -46,6 +52,11 @@ socket.on('moveMade', (move) => {
   updateStatus();
 });
 
+// Fitur Chat Receiver
+socket.on('chatMessage', (data) => {
+  appendChatMessage(data.sender, data.message);
+});
+
 socket.on('roomFull', () => alert('Kamar ini sudah penuh!'));
 socket.on('playerLeft', () => {
   alert('Lawan keluar dari permainan!');
@@ -56,6 +67,7 @@ function initBoard() {
   const config = {
     draggable: true,
     position: 'start',
+    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
     orientation: playerColor === 'w' ? 'white' : 'black',
     onDragStart: (source, piece) => {
       if (!gameStarted || game.game_over()) return false;
@@ -99,6 +111,39 @@ function appendMoveLog(move) {
   moveLog.scrollTop = moveLog.scrollHeight;
 }
 
+// LOGIKA CHAT & EMOJI
+function sendMsg() {
+  const text = chatInput.value.trim();
+  if (text && currentRoom) {
+    const sender = playerColor === 'w' ? 'Putih' : 'Hitam';
+    socket.emit('sendChat', { roomId: currentRoom, message: text, sender });
+    appendChatMessage('Kamu', text);
+    chatInput.value = '';
+  }
+}
+
+sendChatBtn.addEventListener('click', sendMsg);
+chatInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMsg();
+});
+
+// Klik emoji langsung menambahkan ke input text
+emojiBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    chatInput.value += btn.innerText;
+    chatInput.focus();
+  });
+});
+
+function appendChatMessage(sender, message) {
+  const msgEl = document.createElement('div');
+  const isMe = sender === 'Kamu';
+  msgEl.className = `chat-msg ${isMe ? 'me' : 'opponent'}`;
+  msgEl.innerText = `${sender}: ${message}`;
+  chatLog.appendChild(msgEl);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
 function startTimer() {
   timerInterval = setInterval(() => {
     if (!gameStarted || game.game_over()) return;
@@ -127,31 +172,8 @@ function updateTimerDisplay() {
   document.getElementById('opponentTimer').innerText = oTimer;
 }
 
-function initBoard() {
-  const config = {
-    draggable: true,
-    position: 'start',
-    // TAMBAHKAN BARIS INI UNTUK MENGAMBIL GAMBAR BIDAK DARI CDN
-    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
-    
-    orientation: playerColor === 'w' ? 'white' : 'black',
-    onDragStart: (source, piece) => {
-      if (!gameStarted || game.game_over()) return false;
-      if (game.turn() !== playerColor) return false;
-      if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-          (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-        return false;
-      }
-    },
-    onDrop: (source, target) => {
-      const move = game.move({ from: source, to: target, promotion: 'q' });
-      if (move === null) return 'snapback';
-
-      socket.emit('makeMove', { roomId: currentRoom, move });
-      appendMoveLog(move);
-      updateStatus();
-    },
-    onSnapEnd: () => board.position(game.fen())
-  };
-  board = Chessboard('board', config);
-}
+window.addEventListener('resize', () => {
+  if (board) {
+    board.resize();
+  }
+});
