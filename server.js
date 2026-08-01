@@ -44,6 +44,11 @@ io.on('connection', (socket) => {
     socket.to(data.roomId).emit('moveMade', data.move);
   });
 
+  // Handler untuk Mengirim Pesan Chat & Emoji ke Lawan
+  socket.on('sendChat', (data) => {
+    socket.to(data.roomId).emit('chatMessage', data);
+  });
+
   socket.on('disconnect', () => {
     for (const roomId in rooms) {
       rooms[roomId] = rooms[roomId].filter(id => id !== socket.id);
